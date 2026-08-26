@@ -1,25 +1,21 @@
-name: Workflow Sync
+name: Sync to Repo B
 
 on:
   push:
-    branches:
-      - master
-env:
-  DRY_RUN: false
-  REPOSITORIES: |
-  
-  WORKFLOW_FILES: |
+    branches: [ main ]
 
 jobs:
-  Github_Workflow_Sync:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetching Local Repository
-        uses: actions/checkout@master
-      - name: Running Workflow Sync
-        uses: varunsridharan/action-github-workflow-sync@main
+      - uses: actions/checkout@v4
         with:
-          DRY_RUN: ${{ env.DRY_RUN }}
-          REPOSITORIES: ${{ env.REPOSITORIES }}
-          WORKFLOW_FILES: ${{ env.WORKFLOW_FILES }}
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          fetch-depth: 0
+
+      - name: Push to Repo B
+        env:
+          PAT: ${{ secrets.SYNC_PAT }}
+        run: |
+          git remote add target https://x-access-token:${PAT}@github.com/username/repo-b.git
+          git fetch target
+          git push target main
